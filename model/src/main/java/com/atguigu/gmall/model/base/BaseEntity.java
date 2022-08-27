@@ -16,7 +16,7 @@ import java.util.Date;
 public class BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "id")
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.AUTO) //插入一条数据之后，能够获取到这条数据对应的主键值！
      private Long id;
 
     @ApiModelProperty(value = "创建时间")
