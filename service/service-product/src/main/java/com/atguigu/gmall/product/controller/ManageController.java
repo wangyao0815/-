@@ -1,10 +1,7 @@
 package com.atguigu.gmall.product.controller;
 
 import com.atguigu.gmall.common.result.Result;
-import com.atguigu.gmall.model.product.BaseAttrInfo;
-import com.atguigu.gmall.model.product.BaseCategory1;
-import com.atguigu.gmall.model.product.BaseCategory2;
-import com.atguigu.gmall.model.product.BaseCategory3;
+import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.service.ManagerService;
 import org.apache.catalina.manager.ManagerServlet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +11,7 @@ import java.util.List;
 
 @RestController //组合注解 @ResponseBody @Controller  @ResponseBody：a.返回json数据  b.能将数据直接显示到页面
 @RequestMapping("admin/product/")//表示在当前这个类中，有很多映射路径，所有的映射路径都是以 admin/product/
+//@CrossOrigin
 public class ManageController {
 
     @Autowired
@@ -62,5 +60,19 @@ public class ManageController {
          this.managerService.saveAttrInfo(baseAttrInfo);
          //返回数据
         return Result.ok();
+    }
+
+    //  /admin/product/getAttrValueList/{attrId}
+    //  attrId = base_attr_info.id
+    //  根据平台属性Id 回显平台属性值集合
+    @GetMapping("getAttrValueList/{attrId}")
+    public Result getAttrValueList(@PathVariable Long attrId){
+        //调用服务层方法
+        //  先根据平台属性Id判断是否有这个属性，再获取到平台属性值集合
+        BaseAttrInfo baseAttrInfo = this.managerService.getAttrInfo(attrId);
+        //  这个方法，直接根据平台属性Id 查询了平台属性值集合
+        //  List<BaseAttrValue> baseAttrValueList = this.managerService.getAttrValueList(attrId);
+        //  返回数据
+        return  Result.ok(baseAttrInfo.getAttrValueList());
     }
 }

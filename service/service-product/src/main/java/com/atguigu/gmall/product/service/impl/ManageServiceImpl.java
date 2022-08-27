@@ -4,6 +4,8 @@ import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.mapper.*;
 import com.atguigu.gmall.product.service.ManagerService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jodd.util.Consumers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class ManageServiceImpl implements ManagerService {
     @Autowired
     private BaseAttrValueMapper baseAttrValueMapper;
 
+    @Autowired
+    private SpuInfoMapper spuInfoMapper;
+
     @Override
     public List<BaseCategory1> getCategory1() {
         //select * from base_category1 where is_deleted = 0;
@@ -58,12 +63,24 @@ public class ManageServiceImpl implements ManagerService {
         // 调用mapper
         return baseAttrInfoMapper.selectAttrInfoList(category1Id, category2Id, category3Id);
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)//当发生异常的时候直接回滚数据
     public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
+        //判断什么时候修改，什么时候新增
+        if (baseAttrInfo.getId()!=null){
+            //修改 base_attr_info
+            baseAttrInfoMapper.updateById(baseAttrInfo);
+            //修改的时候删除数据；逻辑删除 本质是 update base_attr_value set is_deleted = 1 where attr_id = ?
+            QueryWrapper<BaseAttrValue> baseAttrValueQueryWrapper = new QueryWrapper<>();
+            baseAttrValueQueryWrapper.eq("attr_id", baseAttrInfo.getId());
+            baseAttrValueMapper.delete(baseAttrValueQueryWrapper);
+        }else {
+            //新增
+            //保存数据：base_attr_info
+            baseAttrInfoMapper.insert(baseAttrInfo);
+        }
         //保存数据：base_attr_info base_attr_value
-        baseAttrInfoMapper.insert(baseAttrInfo);
+        //baseAttrInfoMapper.insert(baseAttrInfo);
         //从baseAttrInfo.getAttrValueList();
         //获取到平台属性值集合
         List<BaseAttrValue> attrValueList = baseAttrInfo.getAttrValueList();
@@ -77,7 +94,36 @@ public class ManageServiceImpl implements ManagerService {
                 baseAttrValueMapper.insert(baseAttrValue);
             });
         }
+    }
 
+    @Override
+    public List<BaseAttrValue> getAttrValueList(Long attrId) {
+        //根据平台属性Id 回显平台属性集合 selest * from base_attr_value where attr_id = ?
+        //Wrapper -- 封装[查询，修改，删除]条件
+        //操作的哪张表，就对应写那个表的实体类
+        QueryWrapper<BaseAttrValue> baseAttrValueQueryWrapper = new QueryWrapper<>();
+        baseAttrValueQueryWrapper.eq("attr_id", attrId);
+        return baseAttrValueMapper.selectList(baseAttrValueQueryWrapper);
+    }
 
+    @Override
+    public BaseAttrInfo getAttrInfo(Long attrId) {
+        //根据主键查询数据
+        BaseAttrInfo baseAttrInfo = baseAttrInfoMapper.selectById(attrId);
+        if (baseAttrInfo!=null){
+            //查询平台属性值集合数据并赋值
+            baseAttrInfo.setAttrValueList(this.getAttrValueList(attrId));
+        }
+        //返回平台属性
+        return baseAttrInfo;
+    }
+
+    @Override
+    public IPage<SpuInfo> getSpuList(Page<SpuInfo> spuInfoPage, SpuInfo spuInfo) {
+        //select * from spu_info where category3_id = 61 order by id desc limit 0,10  #第二页
+        QueryWrapper<SpuInfo> spuInfoQueryWrapper = new QueryWrapper<>();
+        spuInfoQueryWrapper.eq("category3_id", spuInfo.getCategory3Id());
+        spuInfoQueryWrapper.orderByDesc("id");
+        return spuInfoMapper.selectPage(spuInfoPage, spuInfoQueryWrapper);
     }
 }

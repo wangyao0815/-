@@ -1,9 +1,8 @@
 package com.atguigu.gmall.product.service;
 
-import com.atguigu.gmall.model.product.BaseAttrInfo;
-import com.atguigu.gmall.model.product.BaseCategory1;
-import com.atguigu.gmall.model.product.BaseCategory2;
-import com.atguigu.gmall.model.product.BaseCategory3;
+import com.atguigu.gmall.model.product.*;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -42,4 +41,26 @@ public interface ManagerService {
      * @param baseAttrInfo
      */
     void saveAttrInfo(BaseAttrInfo baseAttrInfo);
+
+    /**
+     * 根据平台属性id 查询平台属性集合
+     * @param attrId
+     * @return
+     */
+    List<BaseAttrValue> getAttrValueList(Long attrId);
+
+    /**
+     * 根据平台属性Id，查询平台属性数据
+     * @param attrId
+     * @return
+     */
+    BaseAttrInfo getAttrInfo(Long attrId);
+
+    /**
+     * 根据三级分类Id 查询spu 列表
+     * @param spuInfoPage
+     * @param spuInfo
+     * @return
+     */
+    IPage<SpuInfo> getSpuList(Page<SpuInfo> spuInfoPage, SpuInfo spuInfo);
 }
