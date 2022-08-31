@@ -11,5 +11,12 @@
 
     <artifactId>service-item</artifactId>
 
-
+    <dependencies>
+<!--        依赖 查看问题-->
+        <dependency>
+            <groupId>com.atguigu.gmall</groupId>
+            <artifactId>service-product-client</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 </project>

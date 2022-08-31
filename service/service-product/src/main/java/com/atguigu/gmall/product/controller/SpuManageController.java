@@ -5,14 +5,12 @@ import com.atguigu.gmall.model.product.BaseSaleAttr;
 import com.atguigu.gmall.model.product.SpuImage;
 import com.atguigu.gmall.model.product.SpuInfo;
 import com.atguigu.gmall.model.product.SpuSaleAttr;
-import com.atguigu.gmall.product.service.ManagerService;
+import com.atguigu.gmall.product.service.ManageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController //组合注解 @ResponseBody @Controller  @ResponseBody：a.返回json数据  b.能将数据直接显示到页面
@@ -20,7 +18,7 @@ import java.util.List;
 public class SpuManageController {
 
     @Autowired
-    private ManagerService managerService;
+    private ManageService manageService;
     // springmvc 获取数据：
     //      1.@RequestParam Long category3Id,
     //      2.对象传值：参数名称与实体类的属性名一致，则会自动映射
@@ -39,7 +37,7 @@ public class SpuManageController {
         //mybatis-puls 提供了一个分页对象
         Page<SpuInfo> spuInfoPage = new Page<>(page,limit);
         // 调用服务层方法，封装分页数据
-        IPage<SpuInfo> infoIPage = this.managerService.getSpuList(spuInfoPage,spuInfo);
+        IPage<SpuInfo> infoIPage = this.manageService.getSpuList(spuInfoPage,spuInfo);
         // 返回数据
         return Result.ok(infoIPage);
     }
@@ -49,7 +47,7 @@ public class SpuManageController {
     public Result getBaseSaleAttrList(){
 
         //调用服务层
-        List<BaseSaleAttr> baseSaleAttrList = this.managerService.getBaseSaleAttrList();
+        List<BaseSaleAttr> baseSaleAttrList = this.manageService.getBaseSaleAttrList();
         //返回数据
         return Result.ok(baseSaleAttrList);
     }
@@ -58,7 +56,7 @@ public class SpuManageController {
     @PostMapping("saveSpuInfo")
     public Result saveSpuInfo(@RequestBody SpuInfo spuInfo){
         //调用服务层保存方法
-        this.managerService.saveSpuInfo(spuInfo);
+        this.manageService.saveSpuInfo(spuInfo);
         //返回数据
         return Result.ok();
     }
@@ -67,7 +65,7 @@ public class SpuManageController {
     @GetMapping("spuImageList/{spuId}")
     public Result getSpuImageList(@PathVariable Long spuId){
         //调用服务层保存方法
-        List<SpuImage> spuImageList = this.managerService.getSpuImageList(spuId);
+        List<SpuImage> spuImageList = this.manageService.getSpuImageList(spuId);
         //返回数据
         return Result.ok(spuImageList);
     }
@@ -77,7 +75,7 @@ public class SpuManageController {
     @GetMapping("spuSaleAttrList/{spuId}")
     public Result getSpuSaleAttrList(@PathVariable Long spuId){
         //调用服务层保存方法
-        List<SpuSaleAttr> spuSaleAttrList = this.managerService.getSpuSaleAttrList(spuId);
+        List<SpuSaleAttr> spuSaleAttrList = this.manageService.getSpuSaleAttrList(spuId);
         //返回数据
         return Result.ok(spuSaleAttrList);
     }

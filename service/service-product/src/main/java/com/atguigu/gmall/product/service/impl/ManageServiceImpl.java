@@ -2,21 +2,22 @@ package com.atguigu.gmall.product.service.impl;
 
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.mapper.*;
-import com.atguigu.gmall.product.service.ManagerService;
+import com.atguigu.gmall.product.service.ManageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import jodd.util.Consumers;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class ManageServiceImpl implements ManagerService {
+public class ManageServiceImpl implements ManageService {
 
     // mapper 层 select * from base_category1 where is_deleted = 0;
     // mapper 重点要执行上述的sql语句，mabatis-plus 执行； 直接调用mapper 就可以了
@@ -66,6 +67,9 @@ public class ManageServiceImpl implements ManagerService {
 
     @Autowired
     private SkuAttrValueMapper skuAttrValueMapper;
+
+    @Autowired
+    private BaseCategoryViewMapper baseCategoryViewMapper;
 
     @Override
     public List<BaseCategory1> getCategory1() {
@@ -282,5 +286,77 @@ public class ManageServiceImpl implements ManagerService {
         skuInfo.setId(skuId);
         skuInfo.setIsSale(0);
         this.skuInfoMapper.updateById(skuInfo);
+    }
+
+    @Override
+    public SkuInfo getSkuInfo(Long skuId) {
+        //  select * from sku_info where id = ?;
+        //        QueryWrapper<SkuInfo> skuInfoQueryWrapper = new QueryWrapper<>();
+        //        skuInfoQueryWrapper.eq("id", skuId);
+        SkuInfo skuInfo = skuInfoMapper.selectById(skuId);
+        //  select * from sku_image where sku_id = skuId;
+        //  QueryWrapper 构建非主键查询条件
+        QueryWrapper<SkuImage> skuImageQueryWrapper = new QueryWrapper<>();
+        skuImageQueryWrapper.eq("sku_id", skuId);
+        List<SkuImage> skuImageList = skuImageMapper.selectList(skuImageQueryWrapper);
+        skuInfo.setSkuImageList(skuImageList);
+        //  返回数据
+        return skuInfo;
+    }
+
+    @Override
+    public BaseCategoryView getBaseCategoryView(Long category3Id) {
+        //select * from base_category_view where id = 61;
+        return baseCategoryViewMapper.selectById(category3Id);
+    }
+
+    @Override
+    public BigDecimal getSkuPrice(Long skuId) {
+        //  select price from sku_info where id = 24;
+        QueryWrapper<SkuInfo> skuInfoQueryWrapper = new QueryWrapper<>();
+        skuInfoQueryWrapper.eq("id", skuId);
+        //  设置查询字段 price
+        skuInfoQueryWrapper.select("price");
+        SkuInfo skuInfo = skuInfoMapper.selectOne(skuInfoQueryWrapper);
+        if (skuInfo!=null){
+            return skuInfo.getPrice();
+        }
+        //  select * from sku_info where id = 24;
+        //  SkuInfo skuInfo = skuInfoMapper.selectById(skuId);
+        //  返回最新价格
+        return new BigDecimal("0");
+    }
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {
+        //  调用mapper
+        return spuSaleAttrMapper.selectSpuSaleAttrListCheckBySku(skuId,spuId);
+    }
+
+    @Override
+    public Map getSkuValueIdsMap(Long spuId) {
+        //  声明一个map集合
+        HashMap<Object, Object> hashMap = new HashMap<>();
+        //  调用mappper 获取数据  难点一：返回结果类型 map -- 可以代替实体类！ key = property
+        List<Map> mapList = skuSaleAttrValueMapper.selectSkuValueIdsMap(spuId);
+        if (!CollectionUtils.isEmpty(mapList)){
+            mapList.forEach(map -> {
+                //  难点二：通过列名获取数据
+                hashMap.put(map.get("value_ids"), map.get("sku_id"));
+            });
+        }
+        //  返回数据
+        return hashMap;
+    }
+
+    @Override
+    public List<SpuPoster> findSpuPosterBySpuId(Long spuId) {
+        return spuPosterMapper.selectList(new QueryWrapper<SpuPoster>().eq("spu_id", spuId));
+    }
+
+    @Override
+    public List<BaseAttrInfo> getAttrList(Long skuId) {
+        //调用mapper
+        return baseAttrInfoMapper.selectAttrList(skuId);
     }
 }
