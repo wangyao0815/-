@@ -9,13 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>service-product</artifactId>
+    <artifactId>service-item</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>8.2.0</version>
-        </dependency>
-    </dependencies>
+
 </project>

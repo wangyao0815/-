@@ -63,4 +63,56 @@ public interface ManagerService {
      * @return
      */
     IPage<SpuInfo> getSpuList(Page<SpuInfo> spuInfoPage, SpuInfo spuInfo);
+
+    /**
+     * 查询所有销售属性数据
+     * @return
+     */
+    List<BaseSaleAttr> getBaseSaleAttrList();
+
+    /**
+     * 保存spuInfo
+     * @param spuInfo
+     */
+    void saveSpuInfo(SpuInfo spuInfo);
+
+    /**
+     * 根据spuId 获取spuImage 集合
+     * @param spuId
+     * @return
+     */
+    List<SpuImage> getSpuImageList(Long spuId);
+
+    /**
+     * 根据spuId 获取销售属性集合列表
+     * @param spuId
+     * @return
+     */
+    List<SpuSaleAttr> getSpuSaleAttrList(Long spuId);
+
+    /**
+     * 保存skuInfo
+     * @param skuInfo
+     */
+    void saveSkuInfo(SkuInfo skuInfo);
+
+    /**
+     * 根据三级分类Id获取到skuInfo 列表
+     * @param skuInfoPage
+     * @param skuInfo
+     * @return
+     */
+    IPage getskuInfoList(Page<SkuInfo> skuInfoPage, SkuInfo skuInfo);
+
+    /**
+     *上架
+     * @param skuId
+     */
+    void onSale(Long skuId);
+
+    /**
+     * 下架
+     * @param skuId
+     */
+    void cancelSale(Long skuId);
 }

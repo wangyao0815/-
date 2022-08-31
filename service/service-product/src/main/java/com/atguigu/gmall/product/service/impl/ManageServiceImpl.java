@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jodd.util.Consumers;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,33 @@ public class ManageServiceImpl implements ManagerService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Autowired
+    private BaseSaleAttrMapper baseSaleAttrMapper;
+
+    @Autowired
+    private SpuImageMapper spuImageMapper;
+
+    @Autowired
+    private SpuPosterMapper spuPosterMapper;
+
+    @Autowired
+    private SpuSaleAttrMapper spuSaleAttrMapper;
+
+    @Autowired
+    private SpuSaleAttrValueMapper spuSaleAttrValueMapper;
+
+    @Autowired
+    private SkuInfoMapper skuInfoMapper;
+
+    @Autowired
+    private SkuImageMapper skuImageMapper;
+
+    @Autowired
+    private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
+    @Autowired
+    private SkuAttrValueMapper skuAttrValueMapper;
 
     @Override
     public List<BaseCategory1> getCategory1() {
@@ -125,5 +153,134 @@ public class ManageServiceImpl implements ManagerService {
         spuInfoQueryWrapper.eq("category3_id", spuInfo.getCategory3Id());
         spuInfoQueryWrapper.orderByDesc("id");
         return spuInfoMapper.selectPage(spuInfoPage, spuInfoQueryWrapper);
+    }
+
+    @Override
+    public List<BaseSaleAttr> getBaseSaleAttrList() {
+        // select * from base_sale_attr where is_delete = 0;
+        return baseSaleAttrMapper.selectList(null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveSpuInfo(SpuInfo spuInfo) {
+        //保存本质 ：insert
+        //        spu_info
+        spuInfoMapper.insert(spuInfo);
+
+        //        spu_image
+        List<SpuImage> spuImageList = spuInfo.getSpuImageList();
+        if (!CollectionUtils.isEmpty(spuImageList)){
+            spuImageList.forEach(spuImage -> {
+                // 细节：spuId
+                spuImage.setSpuId(spuInfo.getId());
+                spuImageMapper.insert(spuImage);
+            });
+        }
+        //        spu_poster
+        List<SpuPoster> spuPosterList = spuInfo.getSpuPosterList();
+        if (!CollectionUtils.isEmpty(spuPosterList)){
+            spuPosterList.forEach(spuPoster -> {
+                spuPoster.setSpuId(spuInfo.getId());
+                spuPosterMapper.insert(spuPoster);
+            });
+        }
+        //        spu_sale_attr
+        List<SpuSaleAttr> spuSaleAttrList = spuInfo.getSpuSaleAttrList();
+        if (!CollectionUtils.isEmpty(spuImageList)){
+            spuSaleAttrList.forEach(spuSaleAttr -> {
+                spuSaleAttr.setSpuId(spuInfo.getId());
+                spuSaleAttrMapper.insert(spuSaleAttr);
+                //        spu_sale_attr_value
+                List<SpuSaleAttrValue> spuSaleAttrValueList = spuSaleAttr.getSpuSaleAttrValueList();
+                if (!CollectionUtils.isEmpty(spuSaleAttrValueList)){
+                    spuSaleAttrValueList.forEach(spuSaleAttrValue -> {
+
+                        spuSaleAttrValue.setSpuId(spuInfo.getId());
+                        spuSaleAttrValue.setSaleAttrName(spuSaleAttr.getSaleAttrName());
+                        spuSaleAttrValueMapper.insert(spuSaleAttrValue);
+                    });
+                }
+            });
+        }
+    }
+    @Override
+    public List<SpuImage> getSpuImageList(Long spuId) {
+        // select * from spu_image where spu_id = ? and is_delete = 0;
+        return spuImageMapper.selectList(new QueryWrapper<SpuImage>().eq("spu_id", spuId));
+    }
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrList(Long spuId) {
+        // 调用mapper层@
+        return spuSaleAttrMapper.selectSpuSaleAttrList(spuId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class) //默认是运行时异常，只要有异常就回滚！
+    public void saveSkuInfo(SkuInfo skuInfo) {
+        // 判断是否为空，你要做修改吗？有修改才判断，如果没有修改，则直接insert!
+        try {
+            //        sku_info
+            this.skuInfoMapper.insert(skuInfo);
+            //        sku_image
+            List<SkuImage> skuImageList = skuInfo.getSkuImageList();
+            if (!CollectionUtils.isEmpty(skuImageList)){
+                skuImageList.forEach(skuImage -> {
+                    skuImage.setSkuId(skuInfo.getId());
+                    skuImageMapper.insert(skuImage);
+                });
+            }
+            //      sku_attr_value  平台属性数据
+            List<SkuAttrValue> skuAttrValueList = skuInfo.getSkuAttrValueList();
+            if (!CollectionUtils.isEmpty(skuAttrValueList)){
+                skuAttrValueList.forEach(skuAttrValue -> {
+                    // 细节处理skuId
+                    skuAttrValue.setSkuId(skuInfo.getId());
+                    skuAttrValueMapper.insert(skuAttrValue);
+                });
+            }
+            //        sku_sale_attr_value
+            List<SkuSaleAttrValue> skuSaleAttrValueList = skuInfo.getSkuSaleAttrValueList();
+            if (!CollectionUtils.isEmpty(skuSaleAttrValueList)){
+                skuSaleAttrValueList.forEach(skuSaleAttrValue -> {
+                    skuSaleAttrValue.setSkuId(skuInfo.getId());
+                    skuSaleAttrValue.setSpuId(skuInfo.getSpuId());
+                    skuSaleAttrValueMapper.insert(skuSaleAttrValue);
+                });
+            }
+        } catch (Exception e) {
+            // 最后记录日志信息
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public IPage getskuInfoList(Page<SkuInfo> skuInfoPage, SkuInfo skuInfo) {
+        // select * from skuInfo where category3_id = ? and is_delete = 0 order by id desc limit 0, 10;
+        //构建条件
+        QueryWrapper<SkuInfo> skuInfoQueryWrapper = new QueryWrapper<>();
+        skuInfoQueryWrapper.eq("category3_id", skuInfo.getCategory3Id());
+        skuInfoQueryWrapper.orderByDesc("id");
+        return skuInfoMapper.selectPage(skuInfoPage, skuInfoQueryWrapper);
+    }
+
+    @Override
+    public void onSale(Long skuId) {
+        // is_sale = 1
+        //  update sku_info set is_sale = 1 where id = skuId and is_delete = 0;
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        skuInfo.setIsSale(1);
+        this.skuInfoMapper.updateById(skuInfo);
+    }
+
+    @Override
+    public void cancelSale(Long skuId) {
+        // is_sale = 0
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        skuInfo.setIsSale(0);
+        this.skuInfoMapper.updateById(skuInfo);
     }
 }

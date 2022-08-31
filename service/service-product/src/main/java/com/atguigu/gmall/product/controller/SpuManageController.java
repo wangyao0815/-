@@ -1,7 +1,10 @@
 package com.atguigu.gmall.product.controller;
 
 import com.atguigu.gmall.common.result.Result;
+import com.atguigu.gmall.model.product.BaseSaleAttr;
+import com.atguigu.gmall.model.product.SpuImage;
 import com.atguigu.gmall.model.product.SpuInfo;
+import com.atguigu.gmall.model.product.SpuSaleAttr;
 import com.atguigu.gmall.product.service.ManagerService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController //组合注解 @ResponseBody @Controller  @ResponseBody：a.返回json数据  b.能将数据直接显示到页面
 @RequestMapping("admin/product/")//表示在当前这个类中，有很多映射路径，所有的映射路径都是以 admin/product/
@@ -38,5 +42,43 @@ public class SpuManageController {
         IPage<SpuInfo> infoIPage = this.managerService.getSpuList(spuInfoPage,spuInfo);
         // 返回数据
         return Result.ok(infoIPage);
+    }
+
+    // 查询销售属性数据 ：/admin/product/baseSaleAttrList
+    @GetMapping("baseSaleAttrList")
+    public Result getBaseSaleAttrList(){
+
+        //调用服务层
+        List<BaseSaleAttr> baseSaleAttrList = this.managerService.getBaseSaleAttrList();
+        //返回数据
+        return Result.ok(baseSaleAttrList);
+    }
+
+    // /admin/product/saveSpuInfo
+    @PostMapping("saveSpuInfo")
+    public Result saveSpuInfo(@RequestBody SpuInfo spuInfo){
+        //调用服务层保存方法
+        this.managerService.saveSpuInfo(spuInfo);
+        //返回数据
+        return Result.ok();
+    }
+
+    //  http://localhost/admin/product/spuImageList/9
+    @GetMapping("spuImageList/{spuId}")
+    public Result getSpuImageList(@PathVariable Long spuId){
+        //调用服务层保存方法
+        List<SpuImage> spuImageList = this.managerService.getSpuImageList(spuId);
+        //返回数据
+        return Result.ok(spuImageList);
+    }
+
+    // http://localhost/admin/product/spuSaleAttrList/9
+    // 回显销售属性-销售属性值
+    @GetMapping("spuSaleAttrList/{spuId}")
+    public Result getSpuSaleAttrList(@PathVariable Long spuId){
+        //调用服务层保存方法
+        List<SpuSaleAttr> spuSaleAttrList = this.managerService.getSpuSaleAttrList(spuId);
+        //返回数据
+        return Result.ok(spuSaleAttrList);
     }
 }
