@@ -1,6 +1,9 @@
 package com.atguigu.gmall.product.api;
 
+import com.alibaba.fastjson.JSONObject;
+import com.atguigu.gmall.common.result.Result;
 import com.atguigu.gmall.model.product.*;
+import com.atguigu.gmall.product.service.BaseTrademarkService;
 import com.atguigu.gmall.product.service.ManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +21,9 @@ public class ProductApiController {
 
     @Autowired
     private ManageService manageService;
+
+    @Autowired
+    private BaseTrademarkService baseTrademarkService;
 
     // 定义根据skuInfo + skuImage 集合数据！
     // /api/product/inner/getSkuInfo/{skuId}  -- inner 内部数据接口 这个接口表面只能给内部的微服务模块使用
@@ -66,5 +72,19 @@ public class ProductApiController {
     @GetMapping("inner/getAttrList/{skuId}")
     public List<BaseAttrInfo> getAttrList(@PathVariable Long skuId){
         return this.manageService.getAttrList(skuId);
+    }
+
+    //首页数据接口
+    @GetMapping("getBaseCategoryList")
+    public Result getBaseCategoryList(){
+        //调用服务处方法
+        List<JSONObject> list = this.manageService.getBaseCategoryList();
+        return Result.ok(list);
+    }
+    // 查询sku 对应的品牌信息   tmId可以从skuInfo 获取
+    @GetMapping("inner/getTrademark/{tmId}")
+    public BaseTrademark getTrademark(@PathVariable Long tmId){
+        // select * from base_trademark where id = ?
+        return baseTrademarkService.getById(tmId);
     }
 }

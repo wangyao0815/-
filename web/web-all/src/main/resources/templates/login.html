@@ -117,20 +117,14 @@
                 login.login(this.user).then(response => {
                     //	debugger
                     if (response.data.code == 200) {
-                        //  把token存在cookie中、也可以放在localStorage中
-						//	result.ok(map);
-						//	response 相当于Result
-						//	response.data 相当于 Result.ok();
-						//	response.data.data  data看做一个map 相当于 Result.ok(data);
-						//	response.data.map.token 相当于 result.ok(map)
-						//	map 中有token 同时还有 nickName
+                        //  response.data.data.token == 获取后台存储的token 数据！并通过js 方式将token 存储到cookie 中
+						//	response.data = result
+						//	response.data.data = result.data
+						//  response.data.data.token = 要么是map 要么是实体
                         auth.setToken(response.data.data.token)
-						//	response.data.data 相当于返回来的map
-						//	JSON.stringify(response.data.data) 将map 数据变为json对象，存储到cookie 中
+						//	存储用户昵称
                         auth.setUserInfo(JSON.stringify(response.data.data))
-
-						//	输入日志：是否有 originUrl 回跳url！
-						//	originUrl = 记录用户在哪点击的登录url ，当用户登录成功之后，又跳转到了原来的url！
+						//	originUrl = 获取用户在哪里点击的url
                         console.log("originUrl:"+this.originUrl);
                         if(this.originUrl == ''){
                             window.location.href="http://www.gmall.com/index.html"

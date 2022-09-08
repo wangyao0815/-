@@ -9,14 +9,14 @@ public class RedisConst {
     public static final String SKUKEY_PREFIX = "sku:";
     public static final String SKUKEY_SUFFIX = ":info";
     //单位：秒
-    public static final long SKUKEY_TIMEOUT = 24 * 60 * 60;
+    public static final long SKUKEY_TIMEOUT = 30 * 24 * 60 * 60;
     // 定义变量，记录空对象的缓存过期时间
     public static final long SKUKEY_TEMPORARY_TIMEOUT = 10 * 60;
 
     //单位：秒 尝试获取锁的最大等待时间
-    public static final long SKULOCK_EXPIRE_PX1 = 1;
+    public static final long SKULOCK_EXPIRE_PX1 = 10;
     //单位：秒 锁的持有时间
-    public static final long SKULOCK_EXPIRE_PX2 = 1;
+    public static final long SKULOCK_EXPIRE_PX2 = 3;
     public static final String SKULOCK_SUFFIX = ":lock";
 
     public static final String USER_KEY_PREFIX = "user:";
@@ -26,7 +26,7 @@ public class RedisConst {
     //用户登录
     public static final String USER_LOGIN_KEY_PREFIX = "user:login:";
     //    public static final String userinfoKey_suffix = ":info";
-    public static final int USERKEY_TIMEOUT = 60 * 60 * 24 * 7;
+    public static final int USERKEY_TIMEOUT = 60 * 60 * 24 * 30;
 
     //秒杀商品前缀
     public static final String SECKILL_GOODS = "seckill:goods";
@@ -37,5 +37,7 @@ public class RedisConst {
     //用户锁定时间 单位：秒
     public static final int SECKILL__TIMEOUT = 60 * 60 * 1;
 
+    //  布隆过滤器使用！
+    public static final String SKU_BLOOM_FILTER="sku:bloom:filter";
 
 }

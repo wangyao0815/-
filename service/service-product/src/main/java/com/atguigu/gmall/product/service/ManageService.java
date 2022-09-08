@@ -1,5 +1,6 @@
 package com.atguigu.gmall.product.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.gmall.model.product.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -162,9 +163,15 @@ public interface ManageService {
     List<SpuPoster> findSpuPosterBySpuId(Long spuId);
 
     /**
-     * 据skuId 获取到规格参数
+     * 据skuId 获取平台属性
      * @param skuId
      * @return
      */
     List<BaseAttrInfo> getAttrList(Long skuId);
+
+    /**
+     * 查询分类数据
+     * @return
+     */
+    List<JSONObject> getBaseCategoryList();
 }
