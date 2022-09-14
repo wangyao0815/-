@@ -61,6 +61,8 @@ public class AuthGlobalFilter implements GlobalFilter {
 
         //  获取到登录的userId，在缓存中获取数据，必须要有token,token存储在header 或 cookie
         String userId = this.getUserId(request);
+        //  获取一个临时用户Id的方法
+        String userTempId = this.getUserTempId(request);
         //  判断是否属于非法登录 redisIp != ip  return=-1;
         if ("-1".equals(userId)){
             //  设置响应
@@ -102,14 +104,41 @@ public class AuthGlobalFilter implements GlobalFilter {
 
         //  将获取到的用户Id 添加到请求头：请求头可能会存有userId  OOP思想
         //  以后使用这个类AuthContextHolder 来获取用户Id
-        if (!StringUtils.isEmpty(userId)){
-            //  放入请求头：
-            request.mutate().header("userId", userId).build();
+        if (!StringUtils.isEmpty(userId) || !StringUtils.isEmpty(userTempId)){
+            if (!StringUtils.isEmpty(userId)){
+                //  放入请求头：
+                request.mutate().header("userId", userId).build();
+            }
+            //  判断临时用户Id
+            if (!StringUtils.isEmpty(userTempId)){
+                //  放入请求头：
+                request.mutate().header("userTempId", userTempId).build();
+            }
             //  exchange  与 request 关联起来了
             return chain.filter(exchange.mutate().request(request).build());
         }
         //  默认返回，表示这个过滤器结束了
         return chain.filter(exchange);
+    }
+
+    /**
+     * 获取临时用户Id
+     * @param request
+     * @return
+     */
+    private String getUserTempId(ServerHttpRequest request) {
+        //  可能存在cookie,header中！
+        String userTempId = "";
+        HttpCookie httpCookie = request.getCookies().getFirst("userTempId");
+        if (httpCookie!=null){
+            userTempId = httpCookie.getValue();
+        }else {
+            List<String> stringList = request.getHeaders().get("userTempId");
+            if (!CollectionUtils.isEmpty(stringList)){
+                userTempId = stringList.get(0);
+            }
+        }
+        return userTempId;
     }
 
     /**

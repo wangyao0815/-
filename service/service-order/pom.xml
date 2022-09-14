@@ -3,39 +3,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>web</artifactId>
+        <artifactId>service</artifactId>
         <groupId>com.atguigu.gmall</groupId>
         <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>web-all</artifactId>
+    <artifactId>service-order</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.atguigu.gmall</groupId>
-            <artifactId>service-item-client</artifactId>
-            <version>1.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.atguigu.gmall</groupId>
             <artifactId>service-product-client</artifactId>
             <version>1.0</version>
         </dependency>
-
         <dependency>
             <groupId>com.atguigu.gmall</groupId>
-            <artifactId>service-list-client</artifactId>
+            <artifactId>service-cart-client</artifactId>
             <version>1.0</version>
         </dependency>
-
         <dependency>
             <groupId>com.atguigu.gmall</groupId>
-            <artifactId>service-order-client</artifactId>
+            <artifactId>service-user-client</artifactId>
             <version>1.0</version>
         </dependency>
-
     </dependencies>
 
 </project>
