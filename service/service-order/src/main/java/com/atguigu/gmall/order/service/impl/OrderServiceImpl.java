@@ -8,6 +8,8 @@ import com.atguigu.gmall.model.order.OrderInfo;
 import com.atguigu.gmall.order.mapper.OrderDetailMapper;
 import com.atguigu.gmall.order.mapper.OrderInfoMapper;
 import com.atguigu.gmall.order.service.OrderService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -103,5 +105,16 @@ public class OrderServiceImpl implements OrderService {
         String res = HttpClientUtil.doGet(wareUrl + "/hasStock?skuId=" + skuId + "&num=" + skuNum);
         //  返回比较结果。
         return "1".equals(res);
+    }
+
+    @Override
+    public IPage<OrderInfo> getMyOrderList(Page<OrderInfo> orderInfoPage, String userId) {
+        //  两张表：orderInfo , orderDetail;
+        IPage<OrderInfo> infoIPage = orderInfoMapper.selectMyOrder(orderInfoPage,userId);
+        infoIPage.getRecords().forEach(orderInfo -> {
+            String statusName = OrderStatus.getStatusNameByStatus(orderInfo.getOrderStatus());
+            orderInfo.setOrderStatusName(statusName);
+        });
+        return infoIPage;
     }
 }

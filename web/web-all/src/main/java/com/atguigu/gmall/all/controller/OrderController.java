@@ -26,4 +26,12 @@ public class OrderController {
         //  返回订单结算页面
         return "order/trade";
     }
+
+    //  我的订单
+    @GetMapping("myOrder.html")
+    public String myOrder(){
+
+        //  返回我的订单页面
+        return "order/myOrder";
+    }
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--非必要属性：namespace 接口全路径-->
+<mapper namespace="com.atguigu.gmall.order.mapper.OrderInfoMapper">
+    <!--  定义结果集  -->
+    <resultMap id="OrderInfoMap" type="com.atguigu.gmall.model.order.OrderInfo" autoMapping="true">
+        <id property="id" column="id"></id>
+        <collection property="orderDetailList" ofType="com.atguigu.gmall.model.order.OrderDetail" autoMapping="true">
+            <id property="id" column="detail_id"></id>
+        </collection>
+    </resultMap>
+
+    <!--sql 语句  两个表关联查询； userId-->
+    <select id="selectMyOrder" resultMap="OrderInfoMap">
+        SELECT
+            oi.id,
+            oi.consignee,
+            oi.consignee_tel,
+            oi.total_amount,
+            oi.order_status,
+            oi.user_id,
+            oi.payment_way,
+            oi.delivery_address,
+            oi.order_comment,
+            oi.out_trade_no,
+            oi.trade_body,
+            oi.create_time,
+            oi.expire_time,
+            oi.process_status,
+            od.id detail_id,
+            od.order_id,
+            od.sku_id,
+            od.sku_name,
+            od.img_url,
+            od.order_price,
+            od.sku_num,
+            od.create_time
+        FROM
+            order_info oi
+        INNER JOIN order_detail od ON od.order_id = oi.id
+        WHERE
+            user_id = #{userId}
+        AND oi.order_status NOT IN ('CLOSED', 'SPLIT')
+        ORDER BY
+            oi.id DESC
+    </select>
+</mapper>

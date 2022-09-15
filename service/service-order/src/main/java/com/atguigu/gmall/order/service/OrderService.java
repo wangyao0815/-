@@ -1,6 +1,9 @@
 package com.atguigu.gmall.order.service;
 
 import com.atguigu.gmall.model.order.OrderInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
 
 public interface OrderService {
     //  保存订单
@@ -13,4 +16,6 @@ public interface OrderService {
     void delTradeNo(String userId);
     //  检验库存系统
     Boolean checkStock(Long skuId, Integer skuNum);
+    //  查看我的订单
+    IPage<OrderInfo> getMyOrderList(Page<OrderInfo> orderInfoPage, String userId);
 }
