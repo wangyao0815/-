@@ -202,4 +202,14 @@ public class OrderApiController {
         //  返回数据
         return Result.ok(orderInfoIPage);
     }
+
+    //  根据订单Id 获取订单信息
+    @GetMapping("inner/getOrderInfo/{orderId}")
+    public OrderInfo getOrderInfo(@PathVariable Long orderId){
+        //  只有irderInfo ，没有订单明细  ----  后续拆单要用订单明细
+        //  OrderInfo orderInfo = this.orderService.getById(orderId);
+        OrderInfo orderInfo = this.orderService.getOrderInfo(orderId);
+        return orderInfo;
+    }
+
 }

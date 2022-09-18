@@ -1,5 +1,7 @@
 package com.atguigu.gmall.order.service.impl;
 
+import com.atguigu.gmall.common.constant.MqConst;
+import com.atguigu.gmall.common.service.RabbitService;
 import com.atguigu.gmall.common.util.HttpClientUtil;
 import com.atguigu.gmall.model.enums.OrderStatus;
 import com.atguigu.gmall.model.enums.ProcessStatus;
@@ -8,8 +10,10 @@ import com.atguigu.gmall.model.order.OrderInfo;
 import com.atguigu.gmall.order.mapper.OrderDetailMapper;
 import com.atguigu.gmall.order.mapper.OrderInfoMapper;
 import com.atguigu.gmall.order.service.OrderService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper,OrderInfo> implements OrderService {
 
     @Autowired
     private OrderInfoMapper orderInfoMapper;
@@ -30,6 +34,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RabbitService rabbitService;
 
     @Value("${ware.url}")
     private String wareUrl;
@@ -65,6 +72,8 @@ public class OrderServiceImpl implements OrderService {
                 orderDetailMapper.insert(orderDetail);
             });
         }
+        //  发送一个延迟消息
+        this.rabbitService.sendDelayMsg(MqConst.EXCHANGE_DIRECT_ORDER_CANCEL, MqConst.ROUTING_ORDER_CANCEL, orderId, MqConst.DELAY_TIME);
         //  返回订单Id
         return orderId;
     }
@@ -116,5 +125,47 @@ public class OrderServiceImpl implements OrderService {
             orderInfo.setOrderStatusName(statusName);
         });
         return infoIPage;
+    }
+
+    @Override
+    public void execExpiredOrder(Long orderId) {
+        //  本质更新订单状态
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setId(orderId);
+        //  订单 状态
+        orderInfo.setOrderStatus(OrderStatus.CLOSED.name());
+        //  更新进度状态 --- 进度状态能获取到订单状态
+        orderInfo.setProcessStatus(ProcessStatus.CLOSED.name());
+        orderInfo.setUpdateTime(new Date());
+        this.orderInfoMapper.updateById(orderInfo);
+
+        //  根据订单Id ,更新订单状态{PAID，SPLIT}
+
+        this.updateOrderStatus(orderId,ProcessStatus.CLOSED);
+    }
+
+    @Override
+    public OrderInfo getOrderInfo(Long orderId) {
+        //  获取订单对象
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+        //  判断防止空指针
+        if (orderInfo!=null){
+            //  获取订单明细
+            List<OrderDetail> orderDetailList = this.orderDetailMapper.selectList(new QueryWrapper<OrderDetail>().eq("order_id", orderId));
+            orderInfo.setOrderDetailList(orderDetailList);
+        }
+        //  返回数据
+        return orderInfo;
+    }
+
+    private void updateOrderStatus(Long orderId, ProcessStatus processStatus) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setId(orderId);
+        //  订单 状态
+        orderInfo.setOrderStatus(processStatus.getOrderStatus().name());
+        //  更新进度状态  ---  进度状态中能获取到订单状态.
+        orderInfo.setProcessStatus(processStatus.name());
+        orderInfo.setUpdateTime(new Date());
+        this.orderInfoMapper.updateById(orderInfo);
     }
 }

@@ -2,7 +2,9 @@ package com.atguigu.gmall.product.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.gmall.common.cache.GmallCache;
+import com.atguigu.gmall.common.constant.MqConst;
 import com.atguigu.gmall.common.constant.RedisConst;
+import com.atguigu.gmall.common.service.RabbitService;
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.mapper.*;
 import com.atguigu.gmall.product.service.ManageService;
@@ -84,6 +86,9 @@ public class ManageServiceImpl implements ManageService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private RabbitService rabbitService;
 
     @Override
     public List<BaseCategory1> getCategory1() {
@@ -297,6 +302,9 @@ public class ManageServiceImpl implements ManageService {
         skuInfo.setId(skuId);
         skuInfo.setIsSale(1);
         this.skuInfoMapper.updateById(skuInfo);
+
+        //  上架发送; 发送消息的内容根据监听业务
+        this.rabbitService.sendMsg(MqConst.EXCHANGE_DIRECT_GOODS, MqConst.ROUTING_GOODS_UPPER, skuId);
     }
 
     @Override
@@ -306,6 +314,9 @@ public class ManageServiceImpl implements ManageService {
         skuInfo.setId(skuId);
         skuInfo.setIsSale(0);
         this.skuInfoMapper.updateById(skuInfo);
+
+        //  上架发送; 发送消息的内容根据监听业务
+        this.rabbitService.sendMsg(MqConst.EXCHANGE_DIRECT_GOODS, MqConst.ROUTING_GOODS_LOWER, skuId);
     }
 
     @Override

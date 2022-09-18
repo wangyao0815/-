@@ -9,25 +9,20 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>service-list</artifactId>
+    <artifactId>service-payment</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.atguigu.gmall</groupId>
-            <artifactId>service-product-client</artifactId>
+            <artifactId>service-order-client</artifactId>
             <version>1.0</version>
         </dependency>
 
-
+        <!--导入支付宝支付sdk-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.atguigu.gmall</groupId>
-            <artifactId>rabbit-util</artifactId>
-            <version>1.0</version>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.31.7.ALL</version>
         </dependency>
     </dependencies>
 
